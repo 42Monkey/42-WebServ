@@ -1,0 +1,1048 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🗄️ WebServ 🖥</title>
+    <!-- <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+    <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+    <script>
+        const favicon = document.createElement('link');
+        favicon.rel = 'icon';
+        favicon.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">🖥️</text></svg>';
+        document.head.appendChild(favicon);
+        </script> -->
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+            background: linear-gradient(135deg, #0f0f23 0%, #1a1a2e 50%, #16213e 100%);
+            color: #00babc;
+            min-height: 100vh;
+            overflow-x: hidden;
+        }
+
+        .header {
+            background: rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid #00babc;
+            padding: 1rem 2rem;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #00babc;
+            text-shadow: 0 0 20px rgba(0, 186, 188, 0.5);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 12px;
+            margin-bottom: 3rem;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(0, 186, 188, 0.3);
+        }
+
+        .hero h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            background: linear-gradient(45deg, #00babc, #00ff88);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0, 186, 188, 0.5);
+        }
+
+        .hero p {
+            font-size: 1.2rem;
+            color: #ccc;
+            margin-bottom: 2rem;
+        }
+
+        .console-container {
+            background: #1a1a1a;
+            border: 1px solid #00babc;
+            border-radius: 8px;
+            margin: 2rem 0;
+            overflow: hidden;
+            box-shadow: 0 0 20px rgba(0, 186, 188, 0.1);
+        }
+
+        .console-header {
+            display: flex;
+            align-items: center;
+            background: #2a2a2a;
+            padding: 0.8rem 1rem;
+            border-bottom: 1px solid #333;
+        }
+
+        .terminal-dots {
+            display: flex;
+            gap: 0.5rem;
+            margin-right: 1rem;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+        }
+
+        .dot.red { background: #ff5f56; }
+        .dot.yellow { background: #ffbd2e; }
+        .dot.green { background: #27ca3f; }
+
+        .console-title {
+            color: #ccc;
+            font-size: 0.9rem;
+            flex-grow: 1;
+        }
+
+        .connection-status {
+            padding: 0.3rem 0.8rem;
+            border-radius: 12px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .status-connected {
+            background: rgba(39, 202, 63, 0.2);
+            color: #27ca3f;
+            border: 1px solid #27ca3f;
+        }
+
+        .status-disconnected {
+            background: rgba(255, 95, 86, 0.2);
+            color: #ff5f56;
+            border: 1px solid #ff5f56;
+        }
+
+        .console-output {
+            height: 400px;
+            overflow-y: auto;
+            padding: 1rem;
+            background: #1a1a1a;
+            color: #00babc;
+            line-height: 1.4;
+            font-size: 0.9rem;
+        }
+
+        .console-output::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        .console-output::-webkit-scrollbar-track {
+            background: #2a2a2a;
+        }
+
+        .console-output::-webkit-scrollbar-thumb {
+            background: #00babc;
+            border-radius: 4px;
+        }
+
+        .console-input-container {
+            display: flex;
+            align-items: center;
+            background: #2a2a2a;
+            padding: 0.8rem 1rem;
+            border-top: 1px solid #333;
+        }
+
+        .console-prompt {
+            color: #00ff88;
+            margin-right: 0.5rem;
+            user-select: none;
+        }
+
+        .console-input {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            color: #fff;
+            font-family: 'Monaco', monospace;
+            font-size: 0.9rem;
+            outline: none;
+        }
+
+        .console-send {
+            background: linear-gradient(45deg, #00babc, #00ff88);
+            border: none;
+            border-radius: 4px;
+            padding: 0.4rem 0.8rem;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Monaco', monospace;
+            margin-left: 0.5rem;
+        }
+
+        .console-send:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0, 186, 188, 0.4);
+        }
+
+        .log-line {
+            margin-bottom: 0.3rem;
+            word-wrap: break-word;
+        }
+
+        .log-timestamp {
+            color: #666;
+            margin-right: 0.5rem;
+        }
+
+        .log-info { color: #00babc; }
+        .log-success { color: #00ff88; }
+        .log-warning { color: #ffbd2e; }
+        .log-error { color: #ff5f56; }
+        .log-command { color: #00ff88; font-weight: bold; }
+        .log-response { color: #ccc; margin-left: 1rem; }
+
+        .connection-controls {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            align-items: center;
+        }
+
+        .connection-input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(0, 186, 188, 0.5);
+            border-radius: 4px;
+            padding: 0.6rem;
+            color: #fff;
+            font-family: 'Monaco', monospace;
+            width: 200px;
+        }
+
+        .connection-input:focus {
+            outline: none;
+            border-color: #00babc;
+            box-shadow: 0 0 10px rgba(0, 186, 188, 0.3);
+        }
+
+        .btn {
+            background: linear-gradient(45deg, #00babc, #00ff88);
+            border: none;
+            border-radius: 4px;
+            padding: 0.6rem 1.2rem;
+            color: #000;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Monaco', monospace;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 186, 188, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .quick-commands {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .quick-cmd {
+            background: rgba(0, 186, 188, 0.1);
+            border: 1px solid rgba(0, 186, 188, 0.3);
+            border-radius: 4px;
+            padding: 0.3rem 0.6rem;
+            color: #00babc;
+            cursor: pointer;
+            font-size: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .quick-cmd:hover {
+            background: rgba(0, 186, 188, 0.2);
+            border-color: #00babc;
+        }
+
+        .upload-section {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(0, 186, 188, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .upload-area {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .file-input-container {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .file-input {
+            position: absolute;
+            left: -9999px;
+        }
+
+        .file-input-label {
+            background: rgba(0, 186, 188, 0.1);
+            border: 1px solid rgba(0, 186, 188, 0.5);
+            border-radius: 4px;
+            padding: 0.6rem 1.2rem;
+            color: #00babc;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-family: 'Monaco', monospace;
+            display: inline-block;
+        }
+
+        .file-input-label:hover {
+            background: rgba(0, 186, 188, 0.2);
+            border-color: #00babc;
+        }
+
+        .upload-btn {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+        }
+
+        .upload-btn:hover {
+            box-shadow: 0 5px 15px rgba(255, 107, 107, 0.4);
+        }
+
+        .file-info {
+            color: #ccc;
+            font-size: 0.9rem;
+            flex-grow: 1;
+        }
+
+        .matrix-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.1;
+        }
+
+        .glow {
+            animation: glow 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes glow {
+            from { text-shadow: 0 0 10px rgba(0, 186, 188, 0.5); }
+            to { text-shadow: 0 0 20px rgba(0, 186, 188, 0.8), 0 0 30px rgba(0, 186, 188, 0.6); }
+        }
+
+        .cgi-section {
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid rgba(255, 189, 46, 0.3);
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            backdrop-filter: blur(5px);
+        }
+
+        .cgi-controls {
+            display: flex;
+            gap: 0.5rem;
+            align-items: center;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+
+        .method-btn {
+            padding: 0.4rem 0.8rem;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-family: 'Monaco', monospace;
+            font-size: 0.9rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .method-btn.get {
+            background: linear-gradient(45deg, #00babc, #00ff88);
+            color: #000;
+        }
+
+        .method-btn.post {
+            background: linear-gradient(45deg, #ff6b6b, #ffa500);
+            color: #fff;
+        }
+
+        .method-btn.delete {
+            background: linear-gradient(45deg, #e74c3c, #c0392b);
+            color: #fff;
+        }
+
+        .method-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        .cgi-input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 189, 46, 0.5);
+            border-radius: 4px;
+            padding: 0.5rem;
+            color: #fff;
+            font-family: 'Monaco', monospace;
+            flex-grow: 1;
+            min-width: 200px;
+        }
+
+        .cgi-input:focus {
+            outline: none;
+            border-color: #ffbd2e;
+            box-shadow: 0 0 10px rgba(255, 189, 46, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .connection-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .connection-input {
+                width: 100%;
+            }
+
+            .hero h1 {
+                font-size: 2rem;
+            }
+
+            .upload-area {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .cgi-controls {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+    </style>
+</head>
+<body>
+    <canvas class="matrix-bg" id="matrix"></canvas>
+
+    <header class="header">
+        <nav class="nav">
+            <div class="logo glow">WebServ Console</div>
+        </nav>
+    </header>
+
+    <div class="container">
+        <section class="hero">
+            <h1>WebServ Live Console</h1>
+            <p>HTTP Server Real-Time Control Interface</p>
+            <p>I don't wanna work for TEMU</p>
+        </section>
+
+        <section class="connection-controls">
+            <input type="text" class="connection-input" id="server-host" placeholder="Server Host" value="localhost">
+            <input type="number" class="connection-input" id="server-port" placeholder="Port" value="8080">
+            <button class="btn" id="connect-btn" onclick="connectToServer()">Connect</button>
+            <button class="btn" id="disconnect-btn" onclick="disconnectFromServer()" disabled>Disconnect</button>
+            <button class="btn" id="discover-btn" onclick="autoDiscoverServer()" style="background: linear-gradient(45deg, #ff6b6b, #ffa500);">Auto Discover</button>
+        </section>
+
+        <!-- <section class="cgi-section">
+            <h3 style="color: #ffbd2e; margin-bottom: 1rem;">📋 CGI Scripts Manager</h3>
+            <div class="cgi-controls">
+                <input type="text" class="cgi-input" id="cgi-script-name" placeholder="Enter CGI script name (e.g., script.py, test.cgi)" />
+                <button class="method-btn get" onclick="executeCgiScript('GET')">GET</button>
+                <button class="method-btn post" onclick="executeCgiScript('POST')">POST</button>
+                <button class="method-btn delete" onclick="executeCgiScript('DELETE')">DELETE</button>
+            </div>
+            <div style="color: #ccc; font-size: 0.9rem; margin-top: 0.5rem;">
+                Enter the script name above, then select the HTTP method to execute the CGI script
+            </div>
+        </section> -->
+
+        <section class="upload-section">
+            <h3 style="color: #00babc; margin-bottom: 1rem;">📤 File Upload</h3>
+            <div class="upload-area">
+                <div class="file-input-container">
+                    <input type="file" class="file-input" id="file-upload" multiple>
+                    <label for="file-upload" class="file-input-label">Choose Files</label>
+                </div>
+                <div class="file-info" id="file-info">No files selected</div>
+                <button class="btn upload-btn" id="upload-btn" onclick="uploadFiles()" disabled>Upload</button>
+            </div>
+        </section>
+
+        <section class="console-container">
+            <div class="console-header">
+                <div class="terminal-dots">
+                    <div class="dot red"></div>
+                    <div class="dot yellow"></div>
+                    <div class="dot green"></div>
+                </div>
+                <div class="console-title">WebServ Remote Console</div>
+                <div class="connection-status status-disconnected" id="connection-status">Disconnected</div>
+            </div>
+
+            <div class="quick-commands">
+                <div class="quick-cmd" onclick="sendQuickCommand('discover')">discover</div>
+                <div class="quick-cmd" onclick="sendQuickCommand('GET /')">GET</div>
+                <div class="quick-cmd" onclick="sendQuickCommand('POST /upload')">Upload Test</div>
+                <div class="quick-cmd" onclick="sendQuickCommand('DELETE /upload?file=default')">DELETE Test</div>
+                <div class="quick-cmd" onclick="sendQuickCommand('siege -c 10 -t 30s http://localhost:8080/')" style="background: linear-gradient(45deg, #ff6b6b, #ffa500);">Load Test</div>
+                <div class="quick-cmd" onclick="sendQuickCommand('help')">help</div>
+                <div class="quick-cmd" onclick="clearConsole()">clear</div>
+                <!-- <div class="quick-cmd" onclick="clearUploads()" style="background: linear-gradient(45deg, #e74c3c, #c0392b); color: #fff;">clear uploads</div> -->
+            </div>
+
+            <div class="console-output" id="console-output">
+                <div class="log-line log-info">
+                    <span class="log-timestamp">[SYSTEM]</span>
+                    WebServ Console Ready. Enter server details above and click Connect.
+                </div>
+                <div class="log-line log-info">
+                    <span class="log-timestamp">[INFO]</span>
+                    Available commands: HTTP requests (GET, POST, DELETE), server commands
+                </div>
+                <div class="log-line log-warning">
+                    <span class="log-timestamp">[NOTE]</span>
+                    Make sure your WebServ is running before connecting
+                </div>
+            </div>
+
+            <div class="console-input-container">
+                <span class="console-prompt">$</span>
+                <input type="text" class="console-input" id="command-input" placeholder="Enter command or HTTP request..." disabled>
+                <button class="console-send" id="send-btn" onclick="sendCommand()" disabled>Send</button>
+            </div>
+        </section>
+
+        <section style="margin-top: 2rem;">
+            <h3 style="color: #00babc; margin-bottom: 1rem;">How to Use:</h3>
+            <div style="background: rgba(0,0,0,0.3); padding: 1.5rem; border-radius: 8px; color: #ccc;">
+                <p><strong>1. Start your WebServ:</strong> <code>./webserv</code></p>
+                <p><strong>2. Connect (3 ways):</strong></p>
+                <ul style="margin-left: 2rem; margin-top: 0.5rem;">
+                    <li><strong>Auto Discover:</strong> Click "Auto Discover" to scan ports 8080, 9081, 9091</li>
+                    <li><strong>Manual:</strong> Enter host/port and click Connect</li>
+                    <li><strong>URL Params:</strong> <code>?host=localhost&port=8080</code></li>
+                </ul>
+                <p><strong>3. CGI Scripts Manager:</strong></p>
+                <ul style="margin-left: 2rem; margin-top: 0.5rem;">
+                    <li>Enter script name in the CGI input field (e.g., script.py, test.cgi)</li>
+                    <li>Choose method: <strong>GET</strong> (retrieve), <strong>POST</strong> (send data), or <strong>DELETE</strong> (remove)</li>
+                    <li>Click the method button to execute the CGI script</li>
+                    <li>Scripts are executed at <code>/cgi-bin/scriptname</code></li>
+                </ul>
+                <p><strong>4. Upload Files:</strong></p>
+                <ul style="margin-left: 2rem; margin-top: 0.5rem;">
+                    <li>Click "Choose Files" to select files</li>
+                    <li>Click "Upload" to send files to server (preserves extensions)</li>
+                    <li>Files are uploaded to <code>/upload</code> endpoint</li>
+                </ul>
+                <p><strong>5. Send Commands:</strong></p>
+                <ul style="margin-left: 2rem; margin-top: 0.5rem;">
+                    <li><code>discover</code> - Auto-scan for server</li>
+                    <li><code>GET /</code> - Test basic HTTP request</li>
+                    <li><code>POST /cgi-bin/script.py</code> - Test CGI</li>
+                    <li><code>DELETE /cgi-bin/script.py</code> - Delete via CGI</li>
+                    <li><code>DELETE /upload?file=filename.txt</code> - Delete uploaded file</li>
+                    <li><code>status</code> - Get server status</li>
+                    <li>Any valid HTTP request</li>
+                </ul>
+                <p><strong>6. Dynamic Port Support:</strong> The console automatically detects your WebServ configuration!</p>
+            </div>
+        </section>
+    </div>
+
+    <script>
+        let socket = null;
+        let isConnected = false;
+        let selectedFiles = null;
+
+        // Matrix background animation
+        const canvas = document.getElementById('matrix');
+        const ctx = canvas.getContext('2d');
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+
+        const matrix = "WEBSERV42CONSOLE";
+        const matrixArray = matrix.split("");
+        const fontSize = 10;
+        const columns = canvas.width / fontSize;
+        const drops = [];
+
+        for (let x = 0; x < columns; x++) {
+            drops[x] = 1;
+        }
+
+        function draw() {
+            ctx.fillStyle = 'rgba(15, 15, 35, 0.04)';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            ctx.fillStyle = '#00babc';
+            ctx.font = fontSize + 'px Monaco';
+
+            for (let i = 0; i < drops.length; i++) {
+                const text = matrixArray[Math.floor(Math.random() * matrixArray.length)];
+                ctx.fillText(text, i * fontSize, drops[i] * fontSize);
+
+                if (drops[i] * fontSize > canvas.height && Math.random() > 0.975) {
+                    drops[i] = 0;
+                }
+                drops[i]++;
+            }
+        }
+
+        setInterval(draw, 35);
+
+        // Console logging
+        function addLog(message, type = 'info') {
+            const output = document.getElementById('console-output');
+            const logLine = document.createElement('div');
+            logLine.className = `log-line log-${type}`;
+
+            const timestamp = new Date().toLocaleTimeString();
+            logLine.innerHTML = `<span class="log-timestamp">[${timestamp}]</span>${message}`;
+
+            output.appendChild(logLine);
+            output.scrollTop = output.scrollHeight;
+        }
+
+        function clearConsole() {
+            document.getElementById('console-output').innerHTML = '';
+            addLog('Console cleared', 'info');
+        }
+
+        function clearUploads() {
+            if (!isConnected) {
+                addLog('Not connected to server', 'error');
+                return;
+            }
+
+            const host = document.getElementById('server-host').value;
+            const port = document.getElementById('server-port').value;
+
+            addLog('Clearing all uploads...', 'warning');
+
+            // Send DELETE request to clear all uploads
+            fetch(`http://${host}:${port}/uploads/clear`, {
+                method: 'DELETE'
+            })
+            .then(response => {
+                if (response.ok) {
+                    addLog('✅ All uploads cleared successfully', 'success');
+                } else {
+                    addLog('⚠️ Clear uploads returned: ' + response.status + ' ' + response.statusText, 'warning');
+                }
+            })
+            .catch(error => {
+                addLog('❌ Clear uploads failed: ' + error.message, 'error');
+            });
+        }
+
+        // CGI Script Execution with method selection
+        function executeCgiScript(method) {
+            const scriptName = document.getElementById('cgi-script-name').value.trim();
+
+            if (!scriptName) {
+                addLog('Please enter a CGI script name first', 'error');
+                document.getElementById('cgi-script-name').focus();
+                return;
+            }
+
+            if (!isConnected) {
+                addLog('Not connected to server', 'error');
+                return;
+            }
+
+            let command = `${method} /cgi-bin/${scriptName}`;
+
+            addLog(`Executing CGI (${method}): ${scriptName}`, 'info');
+            document.getElementById('command-input').value = command;
+            sendCommand();
+        }
+
+        // File upload handlers
+        document.getElementById('file-upload').addEventListener('change', function(e) {
+            selectedFiles = e.target.files;
+            const fileInfo = document.getElementById('file-info');
+            const uploadBtn = document.getElementById('upload-btn');
+
+            if (selectedFiles.length > 0) {
+                const fileNames = Array.from(selectedFiles).map(f => f.name).join(', ');
+                fileInfo.textContent = `Selected: ${fileNames} (${selectedFiles.length} file${selectedFiles.length > 1 ? 's' : ''})`;
+                uploadBtn.disabled = !isConnected;
+            } else {
+                fileInfo.textContent = 'No files selected';
+                uploadBtn.disabled = true;
+            }
+        });
+
+        async function uploadFiles() {
+            if (!selectedFiles || selectedFiles.length === 0) {
+                addLog('No files selected for upload', 'error');
+                return;
+            }
+
+            if (!isConnected) {
+                addLog('Not connected to server', 'error');
+                return;
+            }
+
+            const host = document.getElementById('server-host').value;
+            const port = document.getElementById('server-port').value;
+
+            for (let i = 0; i < selectedFiles.length; i++) {
+                const file = selectedFiles[i];
+                const fileExtension = file.name.split('.').pop();
+                const fileName = file.name;
+
+                addLog(`Uploading file: ${fileName} (${file.size} bytes, .${fileExtension})`, 'info');
+
+                try {
+                    const fileBuffer = await file.arrayBuffer();
+
+                    const response = await fetch(`http://${host}:${port}/uploads`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': file.type || 'application/octet-stream',
+                            'X-Filename': encodeURIComponent(fileName),
+                            'X-File-Extension': fileExtension,
+                            'Content-Length': file.size.toString()
+                        },
+                        body: fileBuffer
+                    });
+
+                    if (response.ok) {
+                        const responseText = await response.text();
+                        addLog(`✅ File uploaded successfully: ${fileName}`, 'success');
+                        addLog(`Server saved as: uploads/${fileName}`, 'response');
+                        if (responseText) {
+                            addLog(`Server response: ${responseText}`, 'response');
+                        }
+                    } else {
+                        addLog(`❌ Upload failed for ${fileName}: ${response.status} ${response.statusText}`, 'error');
+                        const errorText = await response.text();
+                        if (errorText) {
+                            addLog(`Error details: ${errorText}`, 'response');
+                        }
+                    }
+                } catch (error) {
+                    addLog(`❌ Upload error for ${fileName}: ${error.message}`, 'error');
+                }
+            }
+
+            document.getElementById('file-upload').value = '';
+            selectedFiles = null;
+            document.getElementById('file-info').textContent = 'No files selected';
+            document.getElementById('upload-btn').disabled = true;
+        }
+
+        async function connectToServer() {
+            const host = document.getElementById('server-host').value;
+            const port = document.getElementById('server-port').value;
+
+            if (!host || !port) {
+                addLog('Please enter both host and port', 'error');
+                return;
+            }
+
+            addLog(`Attempting to connect to ${host}:${port}...`, 'info');
+
+            try {
+                const response = await fetch(`http://${host}:${port}/`, {
+                    method: 'GET',
+                    cache: 'no-cache'
+                });
+
+                if (response.ok) {
+                    isConnected = true;
+                    updateConnectionStatus(true);
+                    addLog(`✅ Connected to WebServ at ${host}:${port}`, 'success');
+                    addLog('Ready to send commands and upload files', 'info');
+                } else {
+                    addLog(`❌ Server responded with ${response.status}`, 'error');
+                    addLog('Connection failed', 'error');
+                }
+            } catch (error) {
+                addLog(`❌ Connection failed: ${error.message}`, 'error');
+                addLog('Make sure WebServ is running', 'error');
+            }
+        }
+
+        function disconnectFromServer() {
+            if (socket) {
+                socket.close();
+            }
+            isConnected = false;
+            updateConnectionStatus(false);
+            addLog('Disconnected from server', 'warning');
+        }
+
+        function updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('connection-status');
+            const connectBtn = document.getElementById('connect-btn');
+            const disconnectBtn = document.getElementById('disconnect-btn');
+            const commandInput = document.getElementById('command-input');
+            const sendBtn = document.getElementById('send-btn');
+            const uploadBtn = document.getElementById('upload-btn');
+
+            if (connected) {
+                statusEl.textContent = 'Connected';
+                statusEl.className = 'connection-status status-connected';
+                connectBtn.disabled = true;
+                disconnectBtn.disabled = false;
+                commandInput.disabled = false;
+                sendBtn.disabled = false;
+                uploadBtn.disabled = selectedFiles === null || selectedFiles.length === 0;
+                commandInput.focus();
+            } else {
+                statusEl.textContent = 'Disconnected';
+                statusEl.className = 'connection-status status-disconnected';
+                connectBtn.disabled = false;
+                disconnectBtn.disabled = true;
+                commandInput.disabled = true;
+                sendBtn.disabled = true;
+                uploadBtn.disabled = true;
+            }
+        }
+
+        function sendCommand() {
+            const input = document.getElementById('command-input');
+            const command = input.value.trim();
+
+            if (!command) return;
+            if (!isConnected) {
+                addLog('Not connected to server', 'error');
+                return;
+            }
+
+            addLog(`> ${command}`, 'command');
+            input.value = '';
+
+            sendHttpRequest(command);
+        }
+
+        function sendQuickCommand(command) {
+            if (!isConnected) {
+                addLog('Not connected to server', 'error');
+                return;
+            }
+
+            document.getElementById('command-input').value = command;
+            sendCommand();
+        }
+
+        async function sendHttpRequest(command) {
+            const host = document.getElementById('server-host').value;
+            const port = document.getElementById('server-port').value;
+
+            try {
+                let url, method, body, headers = {};
+
+                if (command.startsWith('GET ')) {
+                    method = 'GET';
+                    const path = command.substring(4).trim();
+                    url = path.startsWith('http') ? path : `http://${host}:${port}${path}`;
+                } else if (command.startsWith('POST ')) {
+                    method = 'POST';
+                    const path = command.substring(5).trim();
+                    url = path.startsWith('http') ? path : `http://${host}:${port}${path}`;
+                    body = 'test=data&example=value';
+                    headers['Content-Type'] = 'application/x-www-form-urlencoded';
+                } else if (command.startsWith('DELETE ')) {
+                    method = 'DELETE';
+                    const path = command.substring(7).trim();
+                    url = path.startsWith('http') ? path : `http://${host}:${port}${path}`;
+                } else if (command === 'discover') {
+                    await autoDiscoverServer();
+                    return;
+                } else if (command === 'help') {
+                    addLog('=== WebServ Console Help ===', 'info');
+                    addLog('Available commands:', 'info');
+                    addLog('• GET /path - Send GET request', 'response');
+                    addLog('• POST /path - Send POST request', 'response');
+                    addLog('• DELETE /path - Send DELETE request', 'response');
+                    addLog('• discover - Auto-detect server', 'response');
+                    addLog('• help - Show this help', 'response');
+                    addLog('• clear - Clear console', 'response');
+                    addLog('', 'info');
+                    addLog('CGI Scripts:', 'info');
+                    addLog('• Enter script name in CGI field above', 'response');
+                    addLog('• Click GET/POST/DELETE buttons to execute', 'response');
+                    addLog('• Scripts run at /cgi-bin/scriptname', 'response');
+                    addLog('• GET: Retrieve data from CGI script', 'response');
+                    addLog('• POST: Send data to CGI script', 'response');
+                    addLog('• DELETE: Delete operation via CGI script', 'response');
+                    addLog('', 'info');
+                    addLog('File Upload:', 'info');
+                    addLog('• Use the file upload section above the console', 'response');
+                    addLog('• Select files and click "Upload" button', 'response');
+                    addLog('• Files are sent to /upload endpoint', 'response');
+                    addLog('', 'info');
+                    addLog('Examples:', 'info');
+                    addLog('• GET / - Get homepage', 'response');
+                    addLog('• GET /cgi-bin/script.py - Execute CGI script', 'response');
+                    addLog('• POST /cgi-bin/test.cgi - POST to CGI script', 'response');
+                    addLog('• DELETE /cgi-bin/cleanup.py - DELETE via CGI', 'response');
+                    addLog('• POST /upload - Test file upload', 'response');
+                    addLog('• DELETE /upload?file=default - Delete file', 'response');
+                    return;
+                } else if (command.startsWith('siege ') || command.startsWith('ab ') || command.startsWith('wrk ')) {
+                    addLog('⚠️ Load testing tools cannot be run in browser console', 'warning');
+                    addLog('Please run these commands in your terminal:', 'info');
+                    addLog(`   ${command}`, 'response');
+                    return;
+                } else {
+                    method = 'GET';
+                    url = command.startsWith('http') ? command : `http://${host}:${port}/${command}`;
+                }
+
+                addLog(`Sending ${method} request to ${url}`, 'info');
+
+                const response = await fetch(url, {
+                    method: method,
+                    headers: headers,
+                    body: method === 'POST' ? body : undefined
+                });
+
+                const responseText = await response.text();
+
+                addLog(`Response (${response.status} ${response.statusText}):`, 'success');
+
+                response.headers.forEach((value, key) => {
+                    addLog(`${key}: ${value}`, 'response');
+                });
+
+                addLog('--- Response Body ---', 'info');
+                const truncated = responseText.length > 500 ?
+                    responseText.substring(0, 500) + '... [truncated]' :
+                    responseText;
+                addLog(truncated, 'response');
+
+            } catch (error) {
+                addLog(`Request failed: ${error.message}`, 'error');
+            }
+        }
+
+        async function autoDiscoverServer() {
+            addLog('Auto-discovering server...', 'info');
+            const possiblePorts = [8080, 9081, 9091];
+            const host = document.getElementById('server-host').value || 'localhost';
+
+            for (const port of possiblePorts) {
+                try {
+                    addLog(`Testing port ${port}...`, 'info');
+
+                    const response = await fetch(`http://${host}:${port}/`, {
+                        method: 'GET',
+                        cache: 'no-cache'
+                    });
+
+                    if (response.ok) {
+                        addLog(`✅ Found server at ${host}:${port}`, 'success');
+                        document.getElementById('server-port').value = port;
+                        isConnected = true;
+                        updateConnectionStatus(true);
+                        return;
+                    }
+                } catch (e) {
+                    continue;
+                }
+            }
+
+            addLog('⚠️ No server found on common ports (8080, 9081, 9091)', 'warning');
+            addLog('💡 Make sure your WebServ is running: ./webserv', 'info');
+        }
+
+        // Event listeners
+        document.getElementById('command-input').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                sendCommand();
+            }
+        });
+
+        document.getElementById('cgi-script-name').addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                // Default to GET when Enter is pressed
+                executeCgiScript('GET');
+            }
+        });
+
+        window.addEventListener('resize', () => {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        });
+
+        addLog('WebServ Console initialized', 'success');
+        addLog('Enter your server details above and click Connect to start', 'info');
+
+        function getUrlParams() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const host = urlParams.get('host') || 'localhost';
+            const port = urlParams.get('port') || '8080';
+
+            if (urlParams.has('host') || urlParams.has('port')) {
+                document.getElementById('server-host').value = host;
+                document.getElementById('server-port').value = port;
+                addLog(`URL params detected: ${host}:${port}`, 'info');
+                return { host, port };
+            }
+            return null;
+        }
+
+        window.addEventListener('load', () => {
+            const urlParams = getUrlParams();
+
+            setTimeout(() => {
+                if (urlParams) {
+                    addLog(`Connecting to ${urlParams.host}:${urlParams.port} from URL params...`, 'info');
+                    connectToServer();
+                } else {
+                    addLog('Auto-scanning for WebServ...', 'info');
+                    autoDiscoverServer();
+                }
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
